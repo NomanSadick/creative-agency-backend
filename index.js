@@ -13,6 +13,7 @@ const app = express()
 app.use(bodyParser.json());
 app.use(cors());
 app.use(express.static('pic'));
+// app.use(express.static('pic2'));
 app.use(fileUpload());
 const port = 5000
 
@@ -25,6 +26,7 @@ client.connect(err => {
   const orderCollection = client.db("creativeAgency").collection("orders");
   const reviewCollection = client.db("creativeAgency").collection("customerReview");
   const adminCollection = client.db("creativeAgency").collection("admin");
+  const adminAddServiceCollection = client.db("creativeAgency").collection("adminAddService");
 
   app.post('/order', (req, res) => {
     const file = req.files.file;
@@ -55,7 +57,7 @@ client.connect(err => {
   })
 
   app.get('/service', (req, res) => {
-    orderCollection.find({})
+    adminAddServiceCollection.find({})
       .toArray((err, documents) => {
         res.send(documents)
       })
@@ -114,6 +116,33 @@ client.connect(err => {
         res.send(documents)
       })
   })
+
+  app.post('/addService', (req, res) => {
+    const file = req.files.file;
+    const title = req.body.title;
+    const description = req.body.description;
+    const img = req.body.img;
+
+
+    file.mv(`${__dirname}/pic/${file.name}`, (err) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).send({ msg: "can not upload" });
+      }
+      adminAddServiceCollection.insertOne({ file, title, description, img })
+        .then(result => {
+          console.log(result);
+          res.send(result.insertedCount > 0)
+        })
+      // orderCollection.insertOne({ name, email, img: file.name })
+      // .then(result => {
+      //   res.send(result.insertedCount > 0)
+      // })
+      // return res.send({ name: file.name, path: `/${file.name}` });
+    });
+  })
+
+  
 
 
 });
