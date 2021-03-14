@@ -36,6 +36,7 @@ client.connect(err => {
     const description = req.body.description;
     const price = req.body.price;
     const img = req.body.img;
+    const status = req.body.status;
 
 
     file.mv(`${__dirname}/pic/${file.name}`, (err) => {
@@ -43,7 +44,7 @@ client.connect(err => {
         console.log(err);
         return res.status(500).send({ msg: "can not upload" });
       }
-      orderCollection.insertOne({ file, name, email, title, description, price, img })
+      orderCollection.insertOne({ file, name, email, title, description, price, img, status })
         .then(result => {
           console.log(result);
           res.send(result.insertedCount > 0)
@@ -60,8 +61,18 @@ client.connect(err => {
     adminAddServiceCollection.find({})
       .toArray((err, documents) => {
         res.send(documents)
+        // console.log(documents);
       })
   })
+
+  app.get('/serviceStatus', (req, res) => {
+    orderCollection.find({})
+      .toArray((err, documents) => {
+        res.send(documents)
+        console.log(documents);
+      })
+  })
+
 
   app.get('/feedback', (req, res) => {
     reviewCollection.find({})
@@ -121,15 +132,23 @@ client.connect(err => {
     const file = req.files.file;
     const title = req.body.title;
     const description = req.body.description;
-    const img = req.body.img;
+    // const img = req.body.img;
+    const img = file.data;
+    const encImg = img.toString('base64');
+
+    var image = {
+        contentType: file.mimetype,
+        size: file.size,
+        img: Buffer.from(encImg, 'base64')
+    };
 
 
-    file.mv(`${__dirname}/pic/${file.name}`, (err) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).send({ msg: "can not upload" });
-      }
-      adminAddServiceCollection.insertOne({ file, title, description, img })
+    // file.mv(`${__dirname}/pic/${file.name}`, (err) => {
+      // if (err) {
+      //   console.log(err);
+      //   return res.status(500).send({ msg: "can not upload" });
+      // }
+      adminAddServiceCollection.insertOne({ file, title, description, image })
         .then(result => {
           console.log(result);
           res.send(result.insertedCount > 0)
@@ -139,7 +158,15 @@ client.connect(err => {
       //   res.send(result.insertedCount > 0)
       // })
       // return res.send({ name: file.name, path: `/${file.name}` });
-    });
+    // });
+  })
+
+  app.get('/allData', (req, res) => {
+    adminAddServiceCollection.find({})
+      .toArray((err, documents) => {
+        res.send(documents)
+        // console.log(documents);
+      })
   })
 
   
