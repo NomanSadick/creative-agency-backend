@@ -15,8 +15,8 @@ app.use(cors());
 app.use(express.static('pic'));
 // app.use(express.static('pic2'));
 app.use(fileUpload());
-const port = 5000
-
+// const port = 5000
+const port = process.env.PORT || 5000;
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
@@ -174,4 +174,5 @@ client.connect(err => {
 
 });
 
-app.listen(process.env.PORT || port);
+// app.listen(process.env.PORT || port);
+app.listen( port,()=>console.log(`connected database server${port}`));
